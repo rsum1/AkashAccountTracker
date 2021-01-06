@@ -72,11 +72,13 @@
         <thead>
           <tr>
             <th scope="col">Address</th>
-            <th scope="col">Amount (AKT)</th>
+            <th scope="col">Delegated AKT</th>
+            <th scope="col">Available AKT</th>
+            <th scope="col">Total AKT</th>
             <th scope="col"></th>
           </tr>
         </thead>
-        <tbody class="movieTable">
+        <tbody class="addressTable">
           <!-- Insert movie rows here -->
         </tbody>
       </table>
@@ -89,24 +91,25 @@
         fetch(`https://api.akash.aneka.io/accounts/${address}`)
           // reformatting response into json data
           .then((r) => r.json())
-          // returns the movie data obj
+          // returns the akash data obj
           .then((address) => {
-            // creating a table row with all of the movie info inside
+            // creating a table row with all of the akash address info inside
             // console.log(address.data.balance.total / 1000000)
             let tr = document.createElement("tr")
             tr.id = address.addressID
             // delete button is given a data attribute to match the id of the entire row for easy deletion
             tr.innerHTML = `
               <td>${address.data.address}</td>
+              <td>${address.data.balance.delegated/1000000}</td>
+              <td>${address.data.balance.available/1000000}</td>
               <td>${address.data.balance.total / 1000000}</td>
-              <td><button class="btn btn-danger deleteBtn" data-movie="${
-                address.addressID
-              }">delete</button></td>
+
         `
             // adds the table row to the page
-            document.querySelector(".movieTable").append(tr)
+            document.querySelector(".addressTable").append(tr)
+            console.log(address.data.balance)
           })
-          // handle your errors
+          // handle your errors 
           .catch((e) => console.error(e))
       }
 
@@ -118,6 +121,7 @@
           e.preventDefault()
           // grabs the text from the input
           var address = document.querySelector("#aktAddress").value
+           
           console.log(address)
           var addressArr = address.split(" ")
           console.log(addressArr)
@@ -127,14 +131,14 @@
           document.querySelector("#aktAddress").value = ""
         })
 
-      // click event listener to delete a table row. MUST grab the document because delete buttons were dynamically added
-      document.addEventListener("click", (e) => {
-        // checks to make sure the thing that was clicked on the page is in fact the delete button
-        if (e.target.className.indexOf("deleteBtn") !== -1) {
-          // removes the entire table row from the page
-          document.querySelector(`#${e.target.dataset.address}`).remove()
-        }
-      })
+      // // click event listener to delete a table row. MUST grab the document because delete buttons were dynamically added
+      // document.addEventListener("click", (e) => {
+      //   // checks to make sure the thing that was clicked on the page is in fact the delete button
+      //   if (e.target.className.indexOf("deleteBtn") !== -1) {
+      //     // removes the entire table row from the page
+      //     document.querySelector(`#${e.target.dataset.address}`).remove()
+      //   }
+      // })
     </script>
   </body>
 </html>
