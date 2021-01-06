@@ -98,7 +98,7 @@
 
       // The below code fills in the first row of the table
       const getStats = (address) => {
-        // ajax request to omdb
+        // ajax request to aneka api
         fetch(`https://api.akash.aneka.io/accounts/${address}`)
           // reformatting response into json data
           .then((r) => r.json())
@@ -125,7 +125,7 @@
           .catch((e) => console.error(e))
       }
 
-      // click event listener to trigger movie search
+      // click event listener to trigger address search
       document
         .querySelector(".submitAddress")
         .addEventListener("click", (e) => {
