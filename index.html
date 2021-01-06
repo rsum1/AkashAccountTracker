@@ -60,28 +60,17 @@
           </div>
         </form>
       </div>
-      <div class="row">
-        <div class="col s3">
-          <form action="#">
-            <div class="file-field input-field">
-              <div class="btn">
-                <span>Import File</span>
-                <input type="file" />
-              </div>
-            </div>
-          </form>
-        </div>
-      </div>
 
       <table class="table">
         <thead>
           <tr>
             <th scope="col">Address</th>
-            <th scope="col">Delegated AKT</th>
-            <th scope="col">Available AKT</th>
-            <th scope="col">Rewards AKT</th>
+            <th scope="col">Delegated</th>
+            <th scope="col">Available</th>
+            <th scope="col">Rewards</th>
+            <th scope="col">Commission</th>
+            <th scope="col">Liquid AKT</th>
             <th scope="col">Total AKT</th>
-            <th scope="col"></th>
           </tr>
         </thead>
         <tbody class="addressTable">
@@ -114,6 +103,15 @@
               <td>${formatNumber(address.data.balance.delegated / 1000000)}</td>
               <td>${formatNumber(address.data.balance.available / 1000000)}</td>
               <td>${formatNumber(address.data.balance.rewards / 1000000)}</td>
+              <td>${formatNumber(
+                address.data.balance.commission / 1000000
+              )}</td>
+              <td>${formatNumber(
+                (address.data.balance.rewards +
+                  address.data.balance.available +
+                  address.data.balance.commission) /
+                  1000000
+              )}</td>
               <td>${formatNumber(address.data.balance.total / 1000000)}</td>
 
         `
