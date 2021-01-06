@@ -46,7 +46,12 @@
             <div class="col s3">
               <form>
                 <!-- <label for="title">Akash Address</label> -->
-                <input type="text" name="title" id="aktAddress" placeholder="Akash Address(s)" />
+                <input
+                  type="text"
+                  name="title"
+                  id="aktAddress"
+                  placeholder="Akash Address(s)"
+                />
                 <button class="btn btn-primary submitAddress">
                   Add Address
                 </button>
@@ -74,6 +79,7 @@
             <th scope="col">Address</th>
             <th scope="col">Delegated AKT</th>
             <th scope="col">Available AKT</th>
+            <th scope="col">Rewards AKT</th>
             <th scope="col">Total AKT</th>
             <th scope="col"></th>
           </tr>
@@ -85,6 +91,11 @@
     </div>
 
     <script type="text/javascript">
+      //Format and round account values for increased legibility
+      function formatNumber(num) {
+        return num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+      }
+
       // The below code fills in the first row of the table
       const getStats = (address) => {
         // ajax request to omdb
@@ -100,16 +111,17 @@
             // delete button is given a data attribute to match the id of the entire row for easy deletion
             tr.innerHTML = `
               <td>${address.data.address}</td>
-              <td>${address.data.balance.delegated/1000000}</td>
-              <td>${address.data.balance.available/1000000}</td>
-              <td>${address.data.balance.total / 1000000}</td>
+              <td>${formatNumber(address.data.balance.delegated / 1000000)}</td>
+              <td>${formatNumber(address.data.balance.available / 1000000)}</td>
+              <td>${formatNumber(address.data.balance.rewards / 1000000)}</td>
+              <td>${formatNumber(address.data.balance.total / 1000000)}</td>
 
         `
             // adds the table row to the page
             document.querySelector(".addressTable").append(tr)
             console.log(address.data.balance)
           })
-          // handle your errors 
+          // handle your errors
           .catch((e) => console.error(e))
       }
 
@@ -121,7 +133,7 @@
           e.preventDefault()
           // grabs the text from the input
           var address = document.querySelector("#aktAddress").value
-           
+
           console.log(address)
           var addressArr = address.split(" ")
           console.log(addressArr)
