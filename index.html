@@ -22,7 +22,8 @@
 
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <title>Document</title>
+
+    <title>Akash Account Tracking Tool</title>
   </head>
   <body>
     <div class="row">
@@ -71,10 +72,12 @@
             <th scope="col">Commission</th>
             <th scope="col">Liquid AKT</th>
             <th scope="col">Total AKT</th>
+            <th scope="col">Tx Incoming</th>
+            <th scope="col">Tx Outgoing</th>
           </tr>
         </thead>
-        <tbody class="addressTable">
-          <!-- Insert movie rows here -->
+        <tbody class="addressTable" id="aktTable">
+          <!-- Insert account rows here -->
         </tbody>
       </table>
     </div>
@@ -87,6 +90,7 @@
 
       // The below code fills in the first row of the table
       const getStats = (address) => {
+    
         // ajax request to aneka api
         fetch(`https://api.akash.aneka.io/accounts/${address}`)
           // reformatting response into json data
@@ -94,7 +98,8 @@
           // returns the akash data obj
           .then((address) => {
             // creating a table row with all of the akash address info inside
-            // console.log(address.data.balance.total / 1000000)
+            console.log(txTest(address.data.address))
+
             let tr = document.createElement("tr")
             tr.id = address.addressID
             // delete button is given a data attribute to match the id of the entire row for easy deletion
@@ -113,11 +118,50 @@
                   1000000
               )}</td>
               <td>${formatNumber(address.data.balance.total / 1000000)}</td>
+              <td>${txTest(address.data.address)}</td>
 
         `
             // adds the table row to the page
             document.querySelector(".addressTable").append(tr)
-            console.log(address.data.balance)
+            //console.log(txTest(address.data.address))
+          })
+          // handle your errors
+          .catch((e) => console.error(e))
+      }
+
+      //Helper function for getting transactions
+      function txTest(address) {
+        //console.log(address)
+        homeAddress = address
+        // ajax request to aneka api
+        fetch(`https://api.akash.aneka.io/validators/${address}/transactions`)
+          // reformatting response into json data
+          .then((r) => r.json())
+          // returns the akash data obj
+          .then((address) => {
+            var txSend = 0
+            var txRecieve = 0
+
+            console.log(address.data.data)
+            for (var i = 0; i < address.data.data.transfer.length; i++) {
+              if (
+                address.data.data.transfer[i].transactions.transfer[0].value
+                  .from_address == homeAddress
+              ) {
+                txSend +=
+                  address.data.data.transfer[i].transactions.transfer[0].value
+                    .amount[0].amount
+              } else {
+                txRecieve +=
+                  address.data.data.transfer[i].transactions.transfer[0].value
+                    .amount[0].amount
+              }
+            }
+            return txSend
+            console.log("txTest ran")
+
+            console.log(txSend)
+            console.log(txRecieve)
           })
           // handle your errors
           .catch((e) => console.error(e))
@@ -131,10 +175,7 @@
           e.preventDefault()
           // grabs the text from the input
           var address = document.querySelector("#aktAddress").value
-
-          console.log(address)
           var addressArr = address.split(" ")
-          console.log(addressArr)
           // passes ajax function the account address
           addressArr.forEach((address) => getStats(address))
           // clears the input
