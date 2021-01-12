@@ -61,44 +61,56 @@
           </div>
         </form>
       </div>
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Address</th>
-            <th scope="col">Delegated</th>
-            <th scope="col">Available</th>
-            <th scope="col">Rewards</th>
-            <th scope="col">Commission</th>
-            <th scope="col">Liquid AKT</th>
-            <th scope="col">Total AKT</th>
-            <th scope="col">Tx Incoming</th>
-            <th scope="col">Tx Outgoing</th>
-          </tr>
-        </thead>
-        <tbody class="addressTable" id="aktTable">
-          <!-- Insert account rows here -->
-        </tbody>
-      </table>
+      <div style="float: left; margin-right: 1px">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col s1">Address</th>
+              <th scope="col s1">Delegated</th>
+              <th scope="col s1">Available</th>
+              <th scope="col s1">Rewards</th>
+              <th scope="col s1">Commission</th>
+              <th scope="col s1">Liquid AKT</th>
+              <th scope="col s1">Total AKT</th>
+            </tr>
+          </thead>
+          <tbody class="addressTable" id="aktTable">
+            <!-- Insert account rows here -->
+          </tbody>
+        </table>
+      </div>
+      <div style="float: left; margin-right: 1px">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col s1">Tx Incoming</th>
+              <th scope="col s1">Tx Outgoing</th>
+            </tr>
+          </thead>
+          <tbody class="txTable" id="aktTable">
+            <!-- Insert account rows here -->
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <script type="text/javascript">
       //Format and round account values for increased legibility
       function formatNumber(num) {
-        return num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+        return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
       }
 
       // The below code fills in the first row of the table
-      const getStats = (address) => {
-    
+      async function getStats(address) {
+        for (var i = 0; i < address.length; i++) {
         // ajax request to aneka api
-        fetch(`https://api.akash.aneka.io/accounts/${address}`)
+        await fetch(`https://api.akash.aneka.io/accounts/${address[i]}`)
           // reformatting response into json data
           .then((r) => r.json())
           // returns the akash data obj
           .then((address) => {
             // creating a table row with all of the akash address info inside
-            console.log(txTest(address.data.address))
+            //console.log(txTest(address.data.address))
 
             let tr = document.createElement("tr")
             tr.id = address.addressID
@@ -118,7 +130,6 @@
                   1000000
               )}</td>
               <td>${formatNumber(address.data.balance.total / 1000000)}</td>
-              <td>${txTest(address.data.address)}</td>
 
         `
             // adds the table row to the page
@@ -127,44 +138,67 @@
           })
           // handle your errors
           .catch((e) => console.error(e))
+        }
       }
 
-      //Helper function for getting transactions
-      function txTest(address) {
-        //console.log(address)
-        homeAddress = address
+      // The below code fills in the first row of the table
+      async function getTx(address) {
+        //for (var i = 0; i < address.length; i++) {
+        var homeAddress = address
         // ajax request to aneka api
-        fetch(`https://api.akash.aneka.io/validators/${address}/transactions`)
+        await fetch(
+          `https://api.akash.aneka.io/validators/${address}/transactions?limit=10000`
+        )
           // reformatting response into json data
           .then((r) => r.json())
           // returns the akash data obj
-          .then((address) => {
+          .then((addressData) => {
+            // creating a table row with all of the akash address info inside
+            console.log(addressData.data.data)
             var txSend = 0
             var txRecieve = 0
 
-            console.log(address.data.data)
-            for (var i = 0; i < address.data.data.transfer.length; i++) {
-              if (
-                address.data.data.transfer[i].transactions.transfer[0].value
-                  .from_address == homeAddress
+            for (var j = 0; j < addressData.data.data.transfer.length; j++) {
+              console.log(homeAddress)
+              for (
+                var k = 0;
+                k <
+                addressData.data.data.transfer[j].transactions.transfer.length;
+                k++
               ) {
-                txSend +=
-                  address.data.data.transfer[i].transactions.transfer[0].value
-                    .amount[0].amount
-              } else {
-                txRecieve +=
-                  address.data.data.transfer[i].transactions.transfer[0].value
-                    .amount[0].amount
+                if (
+                  addressData.data.data.transfer[j].transactions.transfer[k]
+                    .value.from_address == homeAddress
+                ) {
+                  txSend +=
+                    addressData.data.data.transfer[j].transactions.transfer[k]
+                      .value.amount[0].amount
+                } else if  (addressData.data.data.transfer[j].transactions.transfer[k]
+                    .value.to_address == homeAddress){
+                  txRecieve +=
+                    addressData.data.data.transfer[j].transactions.transfer[k]
+                      .value.amount[0].amount
+                }
               }
             }
-            return txSend
-            console.log("txTest ran")
+            let tr = document.createElement("tr")
+            tr.id = addressData.addressID
+            // delete button is given a data attribute to match the id of the entire row for easy deletion
+            tr.innerHTML = `
+                
 
-            console.log(txSend)
-            console.log(txRecieve)
+                <td>${formatNumber(txRecieve / 1000000)}</td>
+                <td>${formatNumber(txSend / 1000000)}</td>
+  
+  
+          `
+            // adds the table row to the page
+            document.querySelector(".txTable").append(tr)
+            //console.log(txTest(address.data.address))
           })
           // handle your errors
           .catch((e) => console.error(e))
+        //}
       }
 
       // click event listener to trigger address search
@@ -177,18 +211,13 @@
           var address = document.querySelector("#aktAddress").value
           var addressArr = address.split(" ")
           // passes ajax function the account address
-          addressArr.forEach((address) => getStats(address))
+          //addressArr.forEach((address) => getStats(address))
+          getStats(addressArr)
+          addressArr.forEach((address) => getTx(address))
           // clears the input
           document.querySelector("#aktAddress").value = ""
         })
 
-      // // click event listener to delete a table row. MUST grab the document because delete buttons were dynamically added
-      // document.addEventListener("click", (e) => {
-      //   // checks to make sure the thing that was clicked on the page is in fact the delete button
-      //   if (e.target.className.indexOf("deleteBtn") !== -1) {
-      //     // removes the entire table row from the page
-      //     document.querySelector(`#${e.target.dataset.address}`).remove()
-      //   }
       // })
     </script>
   </body>
