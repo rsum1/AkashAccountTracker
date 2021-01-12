@@ -103,19 +103,19 @@
       // The below code fills in the first row of the table
       async function getStats(address) {
         for (var i = 0; i < address.length; i++) {
-        // ajax request to aneka api
-        await fetch(`https://api.akash.aneka.io/accounts/${address[i]}`)
-          // reformatting response into json data
-          .then((r) => r.json())
-          // returns the akash data obj
-          .then((address) => {
-            // creating a table row with all of the akash address info inside
-            //console.log(txTest(address.data.address))
+          // ajax request to aneka api
+          await fetch(`https://api.akash.aneka.io/accounts/${address[i]}`)
+            // reformatting response into json data
+            .then((r) => r.json())
+            // returns the akash data obj
+            .then((address) => {
+              // creating a table row with all of the akash address info inside
+              //console.log(txTest(address.data.address))
 
-            let tr = document.createElement("tr")
-            tr.id = address.addressID
-            // delete button is given a data attribute to match the id of the entire row for easy deletion
-            tr.innerHTML = `
+              let tr = document.createElement("tr")
+              tr.id = address.addressID
+              // delete button is given a data attribute to match the id of the entire row for easy deletion
+              tr.innerHTML = `
               <td>${address.data.address}</td>
               <td>${formatNumber(address.data.balance.delegated / 1000000)}</td>
               <td>${formatNumber(address.data.balance.available / 1000000)}</td>
@@ -132,12 +132,12 @@
               <td>${formatNumber(address.data.balance.total / 1000000)}</td>
 
         `
-            // adds the table row to the page
-            document.querySelector(".addressTable").append(tr)
-            //console.log(txTest(address.data.address))
-          })
-          // handle your errors
-          .catch((e) => console.error(e))
+              // adds the table row to the page
+              document.querySelector(".addressTable").append(tr)
+              //console.log(txTest(address.data.address))
+            })
+            // handle your errors
+            .catch((e) => console.error(e))
         }
       }
 
@@ -173,8 +173,10 @@
                   txSend +=
                     addressData.data.data.transfer[j].transactions.transfer[k]
                       .value.amount[0].amount
-                } else if  (addressData.data.data.transfer[j].transactions.transfer[k]
-                    .value.to_address == homeAddress){
+                } else if (
+                  addressData.data.data.transfer[j].transactions.transfer[k]
+                    .value.to_address == homeAddress
+                ) {
                   txRecieve +=
                     addressData.data.data.transfer[j].transactions.transfer[k]
                       .value.amount[0].amount
@@ -213,7 +215,11 @@
           // passes ajax function the account address
           //addressArr.forEach((address) => getStats(address))
           getStats(addressArr)
-          addressArr.forEach((address) => getTx(address))
+          addressArr.forEach((address, i) => {
+            setTimeout(() => {
+              getTx(address)
+            }, i * 1000)
+          })
           // clears the input
           document.querySelector("#aktAddress").value = ""
         })
